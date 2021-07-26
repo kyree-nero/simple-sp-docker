@@ -1,7 +1,9 @@
 #  Docker for Sailpoint
 
-This will create a database and app container based on the vendor binary.  This uses the 8.1 version of the binary.  It will look for a file called identityiq.war in the root of this directory to do work.  Please place it there before you do anything.  
-
+This will create a database and app container based on the vendor binary.  
+<span style="color:green">
+This uses the 8.1 version of the binary.  It will look for a file called identityiq.war in the root of this directory to do work.  Please place it there before you do anything.  
+</span>
 
 ## Create the docker network
 
