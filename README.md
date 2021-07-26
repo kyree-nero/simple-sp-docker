@@ -7,23 +7,24 @@ This will create a database and app container based on the vendor binary.  This 
 
 docker network create --driver bridge sp-net
 
-## Create and run  the db
+## Create and run the db
 
-    docker build  --no-cache  -t sp-db -f Dockerfile.db .
+    docker build  --no-cache  -t sp-db -f Dockerfile.db .   
     docker run -d --name=sp-db --publish=3306:3306  --network sp-net  sp-db:latest   
-
 
 
 ## Run the app
 
-    docker build  --no-cache  --network=host -t sp-app -f Dockerfile.app .
+    docker build  --no-cache  --network=host -t sp-app -f Dockerfile.app .  
     docker run -it --name=sp-app --publish=8080:8080  --network sp-net  sp-app:latest   
+
 
 ## login  
 
-http://localhost:8080/app  
+http://localhost:8080/identityiq  
 spadmin/admin
 
+![it will look like this](working.png "working")
 
 ## Clean up 
 
@@ -36,3 +37,4 @@ spadmin/admin
 ## Other useful urls
 
 [sp install documentation] (https://community.sailpoint.com/t5/IdentityIQ-Product-Guides/8-1-IdentityIQ-Installation-Guide/ta-p/158181)
+
