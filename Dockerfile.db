@@ -1,0 +1,39 @@
+FROM mysql:8.0.15
+LABEL MAINTAINER=kyree
+
+ARG EXTRACTDIR=/iq/tmp/extract
+
+## needed to install jre
+RUN mkdir -p /usr/share/man/man1
+
+## do all the installs
+RUN apt-get update \
+  && apt-get install -y vim psmisc unzip openjdk-8-jre-headless
+
+# set the db password
+ENV MYSQL_ROOT_PASSWORD password
+
+# make the extract dir
+RUN mkdir -p $EXTRACTDIR
+
+# bring in the vendor archive
+ADD identityiq.war /iq
+
+# make the schema file
+RUN chmod -R 777 /iq && \
+  rm -rf $EXTRACTDIR && \
+  mkdir -p $EXTRACTDIR && \
+  unzip /iq/identityiq.war -d $EXTRACTDIR && \
+  chmod -R 777 $EXTRACTDIR  && \
+  cd ${EXTRACTDIR}/WEB-INF/bin && \
+  ./iiq schema
+
+# copy it
+RUN cp /iq/tmp/extract/WEB-INF/database/create_identityiq_tables-8.1.mysql /docker-entrypoint-initdb.d/db.sql
+
+# start it up in the image to load the data
+RUN /entrypoint.sh mysqld & sleep 30 && killall mysqld
+
+
+#docker build  --no-cache  -t sp-db -f Dockerfile.db 
+#docker run -d --name=sp-db --publish=3306:3306  --network sp-net  sp-db:latest   
