@@ -9,17 +9,48 @@ This uses the 8.1 version of the binary.  It will look for a file called identit
 
 docker network create --driver bridge sp-net
 
-## Create and run the db
+## Create and run the db (mysql)
 
-    docker build  --no-cache  -t sp-db -f Dockerfile.db .   
+    docker build  --no-cache  -t sp-db -f Dockerfile.db.mysql .   
     docker run -d --name=sp-db --publish=3306:3306  --network sp-net  sp-db:latest   
 
+## Create and run the db (oracle)
 
-## Run the app
+    git clone https://github.com/oracle/docker-images.git
+    cd docker-images/OracleDatabase/SingleInstance/dockerfiles  
+    sh buildContainerImage.sh -v 18.4.0 -x  
+    docker build  \
+        --no-cache  \
+        -t sp-db \
+        -f Dockerfile.db.ora .
+    docker run --name sp-db \
+        -d \
+        -p 1521:1521 \
+        -p 5500:5500 \
+        --network sp-net \
+        sp-db
 
-    docker build  --no-cache  --network=host -t sp-app -f Dockerfile.app .  
+
+## Run the app (mysql)
+
+    
+    docker build  --no-cache  --network=host \
+    -t sp-app \
+    --build-arg databaseUsername=root \
+    --build-arg databasePassword=password \
+    --build-arg databaseType=MYSQL \
+    -f Dockerfile.app .  
     docker run -it --name=sp-app --publish=8080:8080  --network sp-net  sp-app:latest   
 
+## Run the app (oracle)
+
+    docker build  --no-cache  --network=host \
+    -t sp-app \
+    --build-arg databaseUsername=identityiq \
+    --build-arg databasePassword=identityiq \
+    --build-arg databaseType=ORACLE \
+    -f Dockerfile.app .  
+    docker run -it --name=sp-app --publish=8080:8080  --network sp-net  sp-app:latest   
 
 ## login  
 

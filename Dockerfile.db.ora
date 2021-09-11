@@ -1,0 +1,43 @@
+FROM oracle/database:18.4.0-xe
+LABEL MAINTAINER=kyree
+
+
+
+ARG EXTRACTDIR=/iq/tmp/extract
+
+## needed to install jre
+RUN mkdir -p /usr/share/man/man1
+
+## do all the installs
+#RUN apt-get update \
+#  && apt-get install -y vim psmisc unzip openjdk-8-jre-headless
+RUN yum update -y && \
+    yum install -y vim && \
+    yum install -y psmisc unzip java-1.8.0-openjdk
+
+
+
+# make the extract dir
+RUN mkdir -p $EXTRACTDIR
+
+# bring in the vendor archive
+ADD identityiq.war /iq
+
+# make the schema file
+RUN chmod -R 777 /iq && \
+  rm -rf $EXTRACTDIR && \
+  mkdir -p $EXTRACTDIR && \
+  unzip /iq/identityiq.war -d $EXTRACTDIR && \
+  chmod -R 777 $EXTRACTDIR  && \
+  cd ${EXTRACTDIR}/WEB-INF/bin && \
+  ./iiq schema
+
+# copy it
+RUN cp /iq/tmp/extract/WEB-INF/database/create_identityiq_tables-8.1.oracle /opt/oracle/scripts/setup/01-db.sql
+
+# copy 
+ADD create_identityiq_tables-8.1.oracle.user.sql /opt/oracle/scripts/setup/00-db.sql
+
+# set db params
+ENV ORACLE_PWD password 
+ENV ORACLE_CHARACTERSET AL32UTF8 
